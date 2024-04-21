@@ -360,7 +360,6 @@ function cumaltiveEmployQue() {
 
 
 //Initialization Function - below defines an init function that displays the intro text, prompts the user with the menu, and starts the interaction loop.
-
 function init() {
     inquirer
         .prompt(introText)

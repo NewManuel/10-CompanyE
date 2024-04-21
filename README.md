@@ -85,17 +85,4 @@ SOFTWARE.
 
 * The URL of the GitHub repository: https://github.com/NewManuel/10-CompanyE?tab=readme-ov-fileext
 
-* A walkthrough video demonstrating the functionality of the application.
-
-
-
-## Getting Started
-
-This Challenge will require a video submission. Refer to the [Fullstack Blog Video Submission Guide](https://coding-boot-camp.github.io/full-stack/computer-literacy/video-submission-guide) for additional guidance on creating a video.
-
-
-You might also want to make your queries asynchronous. MySQL2 exposes a `.promise()` function on Connections to upgrade an existing non-Promise connection to use Promises. To learn more and make your queries asynchronous, refer to the [npm documentation on MySQL2](https://www.npmjs.com/package/mysql2).
-
-Design the database schema as shown in the following image:
-
-![Database schema includes tables labeled “employee,” role,” and “department.”](./Assets/12-sql-homework-demo-01.png)
+* A walkthrough video demonstrating the issue in the functionality of the application: https://drive.google.com/file/d/1jGL8OnoQXOtWWyvEe5Wn4ojZUPaPpzNt/view?usp=sharing
