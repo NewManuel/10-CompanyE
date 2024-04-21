@@ -8,6 +8,15 @@ const connection = mysql.createConnection({
     user: 'root',
     database: 'tracker_db'
 })
+//Menu Options - this variable defines a menu array containing options for viewing departments, roles, and employees, as well as adding new departments, roles, and employees, and updating employee roles.This menu is structured as an array of objects, each representing a menu item.
+const menu = [
+    {
+        type: "list",
+        name: "menu",
+        message: "What would you like to do?",
+        choices: ["View all departments", "View all roles", "View all employees", new inquirer.Separator(), "Add a department", "Add a role", "Add an employee", "Update an employee role", new inquirer.Separator(),]
+    },
+];
 //Introduction Text - this vaariable defines an ASCII art intro text to display when the script starts.This is displayed using console.log.
 const introText = [{
     type: 'text',
@@ -22,16 +31,8 @@ const introText = [{
 | (____/\| (___) || )   ( || )      | )   ( || )  \  |   | |   | (____/\
 (_______/(_______)|/     \||/       |/     \||/    )_)   \_/   (_______/
     `,
-}]
-//Menu Options - this variable defines a menu array containing options for viewing departments, roles, and employees, as well as adding new departments, roles, and employees, and updating employee roles.This menu is structured as an array of objects, each representing a menu item.
-const menu = [
-    {
-        type: "list",
-        name: "menu",
-        message: "What would you like to do?",
-        choices: ["View all departments", "View all roles", "View all employees", new inquirer.Separator(), "Add a department", "Add a role", "Add an employee", "Update an employee role", new inquirer.Separator(),]
-    },
-]
+}];
+
 //Prompt Menu Function - below defines a function showMenu that uses inquirer to prompt the user with the menu options defined earlier.Based on the user's choice, it calls different functions to perform corresponding actions.
 function showMenu() {
     inquirer
@@ -67,66 +68,64 @@ function showMenu() {
 //Database Query Functions - below defines functions to execute various SQL queries against the database:
 // These functions use SQL queries to interact with the database and console.log to display the results or error messages.
 
-//employeeQueRefsh - this function updates an employee's role based on user input.
-function employeeQueRefsh() {
-    const employeeListSql = "SELECT CONCAT(first_name, ' ', last_name) AS employee_name FROM employee";
-    connection.query(employeeListSql, (error, employeeList) => {
+//roleQuePlus - this function adds a new role to the database based on user input.
+function roleQuePlus() {
+    const departmentOptionsSql = 'SELECT name FROM department';
+    connection.query(departmentOptionsSql, (error, departmentResults) => {
         if (error) {
-            console.log("Error retreiving employee list: ", error);
+            console.log("Error loading department options: ", error);
             showMenu();
         } else {
-            const employeeChoices = employeeList.map((employee) => employee.employee_name); 
-            const roleOptionsSql = 'SELECT title FROM role';
+            const departmentChoices = departmentResults.map((department) => department.name);
+            inquirer
+                .prompt([
+                    {
+                        name: "role_title",
+                        type: "input",
+                        message: "Role title?",
+                    },
+                    {
+                        name: "role_salary",
+                        type: "number",
+                        message: "Role salary?",
+                    },
+                    {
+                        name: "role_department",
+                        type: "list",
+                        message: "Select Department:",
+                        choices: departmentChoices,
+                    },
+                ])
+                .then((response) => {
+                    const insertRoleSql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+                    const selectDepartmentIdSql = 'SELECT id FROM department WHERE name = ?';
+                    connection.query(selectDepartmentIdSql, [response.role_department], (error, departmentResults) => {
+                        if (error) {
+                            console.log("Error retieving department ID:", error);
+                            showMenu();
+                        } else {
+                            const departmentId = departmentResults[0] ? departmentResults[0].id : null;
 
-            connection.query(roleOptionsSql, (error, roleResults) => {
-                if (error) {
-                    console.log("Error loading role options: ", error);
-                    showMenu();
-                } else {
-                    const roleChoices = roleResults.map((role) => role.title);
-                    inquirer
-                        .prompt([
-                            {
-                                name: "employee",
-                                type: "list",
-                                message: "Select the employee to update: ",
-                                choices: employeeChoices,
-                            },
-                            {
-                                name: "new_role",
-                                type: "list",
-                                message: "Select a new role: ",
-                                choices: roleChoices,
-                            }
-                        ])
-                        .then((response) => {
-                            const updateEmployeeRoleSql = "UPDATE employee SET role_id = ? WHERE CONCAT(first_name, ' ', last_name) = ?";
-
-                            const roleIdSql = "SELECT id FROM role WHERE title = ?";
-
-                            connection.query(roleIdSql, [response.new_role], (error, roleIdResults) => {
-                                if (error) {
-                                    console.log("Error retreiving role ID: ", error);
-                                    showMenu();
-                                } else {
-                                    const roleId = roleIdResults[0] ? roleIdResults[0].id : null;
-                                    connection.query(updateEmployeeRoleSql, [roleId, response.employee], (error, results) => {
-                                        if (error) {
-                                            console.log("Error updating employee role: ", error);
-                                        } else {
-                                            console.log("Updated employee role for:", response.employee);
-                                        }
-                                        showMenu();
+                            if (departmentId !== null) {
+                                connection.query(insertRoleSql, [response.role_title, response.role_salary, departmentId], (error, results) => {
+                                    if (error) {
+                                        console.log("Error inserting into db: ", error);
+                                    } else {
+                                        console.log("Added role: ", response.role_title);
                                     }
-                                    );
-                                }
-                            });
-                        });
-                }
-            })
+                                    showMenu();
+                                })
+                            } else {
+                                console.log("Department not found. Role not added.");
+                                showMenu();
+                            }
+                        }
+                    });
+                });
         }
     })
-}
+
+};
 
 
 //employeeQuePlus- this function Adds a new employee to the database based on user input.
@@ -232,66 +231,69 @@ function employeeQuePlus() {
 
         }
     })
-}
+};
 
-//roleQuePlus - this function adds a new role to the database based on user input.
-function roleQuePlus() {
-    const departmentOptionsSql = 'SELECT name FROM department';
-    connection.query(departmentOptionsSql, (error, departmentResults) => {
+//employeeQueRefsh - this function updates an employee's role based on user input.
+function employeeQueRefsh() {
+    const employeeListSql = "SELECT CONCAT(first_name, ' ', last_name) AS employee_name FROM employee";
+    connection.query(employeeListSql, (error, employeeList) => {
         if (error) {
-            console.log("Error loading department options: ", error);
+            console.log("Error retreiving employee list: ", error);
             showMenu();
         } else {
-            const departmentChoices = departmentResults.map((department) => department.name);
-            inquirer
-                .prompt([
-                    {
-                        name: "role_title",
-                        type: "input",
-                        message: "Role title?",
-                    },
-                    {
-                        name: "role_salary",
-                        type: "number",
-                        message: "Role salary?",
-                    },
-                    {
-                        name: "role_department",
-                        type: "list",
-                        message: "Select Department:",
-                        choices: departmentChoices,
-                    },
-                ])
-                .then((response) => {
-                    const insertRoleSql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
-                    const selectDepartmentIdSql = 'SELECT id FROM department WHERE name = ?';                
-                    connection.query(selectDepartmentIdSql, [response.role_department], (error, departmentResults) => {
-                        if (error) {
-                            console.log("Error retieving department ID:", error);
-                            showMenu();
-                        } else {                           
-                            const departmentId = departmentResults[0] ? departmentResults[0].id : null;
+            const employeeChoices = employeeList.map((employee) => employee.employee_name); 
+            const roleOptionsSql = 'SELECT title FROM role';
 
-                            if (departmentId !== null) {
-                                connection.query(insertRoleSql, [response.role_title, response.role_salary, departmentId], (error, results) => {
-                                    if (error) {
-                                        console.log("Error inserting into db: ", error);
-                                    } else {
-                                        console.log("Added role: ", response.role_title);
-                                    }
-                                    showMenu();
-                                })
-                            } else {
-                                console.log("Department not found. Role not added.");
-                                showMenu();
+            connection.query(roleOptionsSql, (error, roleResults) => {
+                if (error) {
+                    console.log("Error loading role options: ", error);
+                    showMenu();
+                } else {
+                    const roleChoices = roleResults.map((role) => role.title);
+                    inquirer
+                        .prompt([
+                            {
+                                name: "employee",
+                                type: "list",
+                                message: "Select the employee to update: ",
+                                choices: employeeChoices,
+                            },
+                            {
+                                name: "new_role",
+                                type: "list",
+                                message: "Select a new role: ",
+                                choices: roleChoices,
                             }
-                        }
-                    });
-                });
+                        ])
+                        .then((response) => {
+                            const updateEmployeeRoleSql = "UPDATE employee SET role_id = ? WHERE CONCAT(first_name, ' ', last_name) = ?";
+
+                            const roleIdSql = "SELECT id FROM role WHERE title = ?";
+
+                            connection.query(roleIdSql, [response.new_role], (error, roleIdResults) => {
+                                if (error) {
+                                    console.log("Error retreiving role ID: ", error);
+                                    showMenu();
+                                } else {
+                                    const roleId = roleIdResults[0] ? roleIdResults[0].id : null;
+                                    connection.query(updateEmployeeRoleSql, [roleId, response.employee], (error, results) => {
+                                        if (error) {
+                                            console.log("Error updating employee role: ", error);
+                                        } else {
+                                            console.log("Updated employee role for:", response.employee);
+                                        }
+                                        showMenu();
+                                    }
+                                    );
+                                }
+                            });
+                        });
+                }
+            })
         }
     })
+};
 
-}
 
 //departQueAddition - this function adds a new department to the database based on user input.
 function departQueAddition() {
@@ -327,7 +329,7 @@ function cumaltiveDepartQue() {
         }
     showMenu();
     })
-}
+};
 
 //cumaltiveRolesQue - this function retrieves and displays all roles from the database.
 function cumaltiveRolesQue() {
@@ -340,7 +342,7 @@ function cumaltiveRolesQue() {
         }
         showMenu();
     })
-}
+};
 
 //cumaltiveEmployQue - this function retrieves and displays all employees from the database.
 function cumaltiveEmployQue() {
@@ -353,7 +355,7 @@ function cumaltiveEmployQue() {
         }
         showMenu();
     })
-}
+};
 
 
 
@@ -364,7 +366,7 @@ function init() {
         .prompt(introText)
         .then();
     showMenu();
-}
+};
 
 // Script Execution - It calls the init function to start the script.
 init();

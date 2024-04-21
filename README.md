@@ -8,11 +8,6 @@
 Running a business is a very complex task, and this comes with a constant demand in oversight on every aspect of life. This application makes this process of managing departments, staff, and their postions simple with a better process on organization.Developers frequently have to create interfaces that allow non-developers to easily view and interact with information stored in databases (which is labeled as CMS <content management systems>). This application uses the [MySQL2 package](https://www.npmjs.com/package/mysql2) to connect to your MySQL database and perform queries, and the [Inquirer package](https://www.npmjs.com/package/inquirer/v/8.2.4) to interact with the user via the command line.
 ```
 
-
-## User Story
-
-```md
-
 ## User Story
 
 ```md
@@ -42,12 +37,16 @@ THEN YOU are prompted to enter the employee’s first name, last name, role, and
 WHEN YOU choose to update an employee role
 THEN YOU are prompted to select an employee to update and their new role and this information is updated in the database 
 ```
+### Issues
+
+```
+
+```
 
 ## Contributors 
 
-```
->Text
-```
+* ChatGpt
+
 ### License
 
 MIT License
@@ -87,3 +86,16 @@ SOFTWARE.
 * The URL of the GitHub repository: https://github.com/NewManuel/10-CompanyE?tab=readme-ov-fileext
 
 * A walkthrough video demonstrating the functionality of the application.
+
+
+
+## Getting Started
+
+This Challenge will require a video submission. Refer to the [Fullstack Blog Video Submission Guide](https://coding-boot-camp.github.io/full-stack/computer-literacy/video-submission-guide) for additional guidance on creating a video.
+
+
+You might also want to make your queries asynchronous. MySQL2 exposes a `.promise()` function on Connections to upgrade an existing non-Promise connection to use Promises. To learn more and make your queries asynchronous, refer to the [npm documentation on MySQL2](https://www.npmjs.com/package/mysql2).
+
+Design the database schema as shown in the following image:
+
+![Database schema includes tables labeled “employee,” role,” and “department.”](./Assets/12-sql-homework-demo-01.png)
