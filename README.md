@@ -40,7 +40,7 @@ THEN YOU are prompted to select an employee to update and their new role and thi
 ### Issues
 
 ```
-
+1. After all packages are installed, when entering "node index.js" to access the tables in the database through the command line; the command line exits the program back to the command line as soon as the line is executed.
 ```
 
 ## Contributors 
